@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 
 export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNodes, selectedEdges }) {
   const [newNodeName, setNewNodeName] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [newNodeDiff, setNewNodeDiff] = useState(5);
 
   const [editNodeName, setEditNodeName] = useState('');
@@ -236,6 +237,40 @@ export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNode
     setNodes(highlightedNodes);
   };
 
+  const handleSearchChange = (e) => {
+    const val = e.target.value;
+    setSearchQuery(val);
+
+    if (!val.trim()) {
+      setNodes((nds) =>
+        nds.map((n) => ({
+          ...n,
+          data: {
+            ...n.data,
+            highlightBg: undefined,
+            highlightBorder: undefined,
+          },
+        }))
+      );
+      return;
+    }
+
+    const query = val.toLowerCase();
+    setNodes((nds) =>
+      nds.map((n) => {
+        const matches = n.data.label.toLowerCase().includes(query);
+        return {
+          ...n,
+          data: {
+            ...n.data,
+            highlightBg: matches ? '#fef08a' : '#f3f4f6',
+            highlightBorder: matches ? '#ca8a04' : '#e5e7eb',
+          },
+        };
+      })
+    );
+  };
+
   return (
     <aside style={sidebarStyle}>
       <h2 style={{ marginTop: 0 }}>Problem Network</h2>
@@ -244,6 +279,8 @@ export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNode
         <input
           type="text"
           placeholder="Search problems..."
+          value={searchQuery}
+          onChange={handleSearchChange}
           style={inputStyle}
         />
       </div>

@@ -87,6 +87,11 @@ export default function App() {
   const [selectedNodes, setSelectedNodes] = useState([]);
   const [selectedEdges, setSelectedEdges] = useState([]);
 
+  // Drag and drop node connection states
+  const [activeDragNodeId, setActiveDragNodeId] = useState(null);
+  const [hoveredNodeId, setHoveredNodeId] = useState(null);
+  const [hoverRelation, setHoverRelation] = useState(null); // 'cause' or 'effect'
+
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge({ ...params, animated: true }, eds)),
     [setEdges]
@@ -102,6 +107,107 @@ export default function App() {
     setEdges([...layoutedEdges]);
   }, [nodes, edges, setNodes, setEdges]);
 
+  // Handle drag-and-drop linking
+  const onNodeDragStart = useCallback((event, node) => {
+    setActiveDragNodeId(node.id);
+  }, []);
+
+  const onNodeDrag = useCallback((event, node) => {
+    const dragRect = {
+      left: node.position.x,
+      right: node.position.x + nodeWidth,
+      top: node.position.y,
+      bottom: node.position.y + nodeHeight,
+    };
+
+    let foundOverlapId = null;
+    let relation = null;
+
+    for (const otherNode of nodes) {
+      if (otherNode.id === node.id) continue;
+
+      const targetRect = {
+        left: otherNode.position.x,
+        right: otherNode.position.x + nodeWidth,
+        top: otherNode.position.y,
+        bottom: otherNode.position.y + nodeHeight,
+      };
+
+      const isOverlapping = !(
+        dragRect.right < targetRect.left ||
+        dragRect.left > targetRect.right ||
+        dragRect.bottom < targetRect.top ||
+        dragRect.top > targetRect.bottom
+      );
+
+      if (isOverlapping) {
+        foundOverlapId = otherNode.id;
+        const dragCenterY = node.position.y + nodeHeight / 2;
+        const targetCenterY = otherNode.position.y + nodeHeight / 2;
+        
+        // Dragged node A is dropped over (above) B -> B is cause (B -> A)
+        if (dragCenterY < targetCenterY) {
+          relation = 'cause';
+        } else {
+          relation = 'effect'; // Dragged node A is dropped under B -> B is effect (A -> B)
+        }
+        break;
+      }
+    }
+
+    setHoveredNodeId(foundOverlapId);
+    setHoverRelation(relation);
+  }, [nodes]);
+
+  const onNodeDragStop = useCallback((event, node) => {
+    if (hoveredNodeId && hoverRelation) {
+      const sourceId = hoverRelation === 'cause' ? hoveredNodeId : node.id;
+      const targetId = hoverRelation === 'cause' ? node.id : hoveredNodeId;
+
+      const edgeExists = edges.some(e => e.source === sourceId && e.target === targetId);
+      if (!edgeExists) {
+        setEdges((eds) => addEdge({
+          id: `edge-${Date.now()}`,
+          source: sourceId,
+          target: targetId,
+          animated: true
+        }, eds));
+      }
+    }
+    setActiveDragNodeId(null);
+    setHoveredNodeId(null);
+    setHoverRelation(null);
+  }, [hoveredNodeId, hoverRelation, edges, setEdges]);
+
+  // Inject hover state to nodes for custom visual cues
+  const displayNodes = nodes.map(node => {
+    if (node.id === hoveredNodeId) {
+      return {
+        ...node,
+        data: {
+          ...node.data,
+          isHoveredTarget: true,
+          hoverRelation: hoverRelation
+        }
+      };
+    }
+    return node;
+  });
+
+  // Inject preview edge while dragging over a target node
+  const displayEdges = hoveredNodeId && hoverRelation && activeDragNodeId
+    ? [
+        ...edges,
+        {
+          id: 'preview-edge',
+          source: hoverRelation === 'cause' ? hoveredNodeId : activeDragNodeId,
+          target: hoverRelation === 'cause' ? activeDragNodeId : hoveredNodeId,
+          animated: true,
+          style: { stroke: '#ff5500', strokeDasharray: '5,5', strokeWidth: 2 }
+        }
+      ]
+    : edges;
+
   return (
     <div style={{ display: 'flex', width: '100vw', height: '100vh' }}>
       <Sidebar
@@ -115,8 +221,8 @@ export default function App() {
 
       <div style={{ flexGrow: 1, position: 'relative' }}>
         <ReactFlow
-          nodes={nodes}
-          edges={edges}
+          nodes={displayNodes}
+          edges={displayEdges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onSelectionChange={({ nodes, edges }) => {
@@ -124,6 +230,9 @@ export default function App() {
             setSelectedEdges(edges);
           }}
           onConnect={onConnect}
+          onNodeDragStart={onNodeDragStart}
+          onNodeDrag={onNodeDrag}
+          onNodeDragStop={onNodeDragStop}
           nodeTypes={nodeTypes}
           fitView
         >
