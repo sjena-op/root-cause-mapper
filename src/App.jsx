@@ -27,10 +27,10 @@ const initialNodes = [
 ];
 
 const initialEdges = [
-  { id: 'e-edu-rules', source: 'edu', target: 'rules', animated: true, markerEnd: { type: MarkerType.ArrowClosed } },
-  { id: 'e-corrupt-enforce', source: 'corrupt', target: 'enforce', animated: true, markerEnd: { type: MarkerType.ArrowClosed } },
-  { id: 'e-enforce-rules', source: 'enforce', target: 'rules', animated: true, markerEnd: { type: MarkerType.ArrowClosed } },
-  { id: 'e-rules-traffic', source: 'rules', target: 'traffic', animated: true, markerEnd: { type: MarkerType.ArrowClosed } },
+  { id: 'e-edu-rules', source: 'edu', target: 'rules', animated: true, markerEnd: { type: MarkerType.ArrowClosed, color: '#000000' }, style: { stroke: '#000000' } },
+  { id: 'e-corrupt-enforce', source: 'corrupt', target: 'enforce', animated: true, markerEnd: { type: MarkerType.ArrowClosed, color: '#000000' }, style: { stroke: '#000000' } },
+  { id: 'e-enforce-rules', source: 'enforce', target: 'rules', animated: true, markerEnd: { type: MarkerType.ArrowClosed, color: '#000000' }, style: { stroke: '#000000' } },
+  { id: 'e-rules-traffic', source: 'rules', target: 'traffic', animated: true, markerEnd: { type: MarkerType.ArrowClosed, color: '#000000' }, style: { stroke: '#000000' } },
 ];
 
 // --- AUTO LAYOUT ENGINE SETUP ---
@@ -94,7 +94,7 @@ export default function App() {
   const [hoverRelation, setHoverRelation] = useState(null); // 'cause' or 'effect'
 
   const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge({ ...params, animated: true, markerEnd: { type: MarkerType.ArrowClosed } }, eds)),
+    (params) => setEdges((eds) => addEdge({ ...params, animated: true, markerEnd: { type: MarkerType.ArrowClosed, color: '#000000' }, style: { stroke: '#000000' } }, eds)),
     [setEdges]
   );
 
@@ -172,7 +172,8 @@ export default function App() {
           source: sourceId,
           target: targetId,
           animated: true,
-          markerEnd: { type: MarkerType.ArrowClosed }
+          style: { stroke: '#000000' },
+          markerEnd: { type: MarkerType.ArrowClosed, color: '#000000' }
         }, eds));
       }
     }
