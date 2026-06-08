@@ -6,7 +6,8 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   addEdge,
-  Panel
+  Panel,
+  MarkerType
 } from 'reactflow';
 import dagre from 'dagre';
 import 'reactflow/dist/style.css';
@@ -26,10 +27,10 @@ const initialNodes = [
 ];
 
 const initialEdges = [
-  { id: 'e-edu-rules', source: 'edu', target: 'rules', animated: true },
-  { id: 'e-corrupt-enforce', source: 'corrupt', target: 'enforce', animated: true },
-  { id: 'e-enforce-rules', source: 'enforce', target: 'rules', animated: true },
-  { id: 'e-rules-traffic', source: 'rules', target: 'traffic', animated: true },
+  { id: 'e-edu-rules', source: 'edu', target: 'rules', animated: true, markerEnd: { type: MarkerType.ArrowClosed } },
+  { id: 'e-corrupt-enforce', source: 'corrupt', target: 'enforce', animated: true, markerEnd: { type: MarkerType.ArrowClosed } },
+  { id: 'e-enforce-rules', source: 'enforce', target: 'rules', animated: true, markerEnd: { type: MarkerType.ArrowClosed } },
+  { id: 'e-rules-traffic', source: 'rules', target: 'traffic', animated: true, markerEnd: { type: MarkerType.ArrowClosed } },
 ];
 
 // --- AUTO LAYOUT ENGINE SETUP ---
@@ -93,7 +94,7 @@ export default function App() {
   const [hoverRelation, setHoverRelation] = useState(null); // 'cause' or 'effect'
 
   const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge({ ...params, animated: true }, eds)),
+    (params) => setEdges((eds) => addEdge({ ...params, animated: true, markerEnd: { type: MarkerType.ArrowClosed } }, eds)),
     [setEdges]
   );
 
@@ -145,11 +146,11 @@ export default function App() {
         const dragCenterY = node.position.y + nodeHeight / 2;
         const targetCenterY = otherNode.position.y + nodeHeight / 2;
         
-        // Dragged node A is dropped over (above) B -> B is cause (B -> A)
+        // Dragged node A is dropped over (above) B -> A is cause of B (A -> B)
         if (dragCenterY < targetCenterY) {
           relation = 'cause';
         } else {
-          relation = 'effect'; // Dragged node A is dropped under B -> B is effect (A -> B)
+          relation = 'effect'; // Dragged node A is dropped under B -> A is effect of B (B -> A)
         }
         break;
       }
@@ -161,8 +162,8 @@ export default function App() {
 
   const onNodeDragStop = useCallback((event, node) => {
     if (hoveredNodeId && hoverRelation) {
-      const sourceId = hoverRelation === 'cause' ? hoveredNodeId : node.id;
-      const targetId = hoverRelation === 'cause' ? node.id : hoveredNodeId;
+      const sourceId = hoverRelation === 'cause' ? node.id : hoveredNodeId;
+      const targetId = hoverRelation === 'cause' ? hoveredNodeId : node.id;
 
       const edgeExists = edges.some(e => e.source === sourceId && e.target === targetId);
       if (!edgeExists) {
@@ -170,7 +171,8 @@ export default function App() {
           id: `edge-${Date.now()}`,
           source: sourceId,
           target: targetId,
-          animated: true
+          animated: true,
+          markerEnd: { type: MarkerType.ArrowClosed }
         }, eds));
       }
     }
@@ -200,10 +202,11 @@ export default function App() {
         ...edges,
         {
           id: 'preview-edge',
-          source: hoverRelation === 'cause' ? hoveredNodeId : activeDragNodeId,
-          target: hoverRelation === 'cause' ? activeDragNodeId : hoveredNodeId,
+          source: hoverRelation === 'cause' ? activeDragNodeId : hoveredNodeId,
+          target: hoverRelation === 'cause' ? hoveredNodeId : activeDragNodeId,
           animated: true,
-          style: { stroke: '#ff5500', strokeDasharray: '5,5', strokeWidth: 2 }
+          style: { stroke: '#ff5500', strokeDasharray: '5,5', strokeWidth: 2 },
+          markerEnd: { type: MarkerType.ArrowClosed, color: '#ff5500' }
         }
       ]
     : edges;
@@ -219,7 +222,40 @@ export default function App() {
         selectedEdges={selectedEdges}
       />
 
-      <div style={{ flexGrow: 1, position: 'relative' }}>
+      <div style={{ flexGrow: 1, position: 'relative', background: 'linear-gradient(to bottom, #ffb0b0, #b0b0ff)' }}>
+        {/* Fixed CAUSES / EFFECTS Background Labels */}
+        <div style={{
+          position: 'absolute',
+          top: '40px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          fontSize: '4rem',
+          fontWeight: '900',
+          color: 'rgba(255, 255, 255, 0.35)',
+          pointerEvents: 'none',
+          userSelect: 'none',
+          letterSpacing: '0.3em',
+          zIndex: 0
+        }}>
+          CAUSES
+        </div>
+        
+        <div style={{
+          position: 'absolute',
+          bottom: '40px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          fontSize: '4rem',
+          fontWeight: '900',
+          color: 'rgba(255, 255, 255, 0.35)',
+          pointerEvents: 'none',
+          userSelect: 'none',
+          letterSpacing: '0.3em',
+          zIndex: 0
+        }}>
+          EFFECTS
+        </div>
+
         <ReactFlow
           nodes={displayNodes}
           edges={displayEdges}
@@ -234,6 +270,7 @@ export default function App() {
           onNodeDrag={onNodeDrag}
           onNodeDragStop={onNodeDragStop}
           nodeTypes={nodeTypes}
+          deleteKeyCode={['Backspace', 'Delete']}
           fitView
         >
           <Panel position="top-right">

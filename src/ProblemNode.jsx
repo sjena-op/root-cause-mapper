@@ -49,7 +49,7 @@ export default function ProblemNode({ data, selected }) {
           zIndex: 10,
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
         }}>
-          {hoverRel === 'cause' ? 'Make Cause (Target → Dragged)' : 'Make Effect (Dragged → Target)'}
+          {hoverRel === 'cause' ? 'Make Dragged Cause (Dragged → Target)' : 'Make Dragged Effect (Target → Dragged)'}
         </div>
       )}
 
