@@ -108,6 +108,29 @@ export default function App() {
     setEdges([...layoutedEdges]);
   }, [nodes, edges, setNodes, setEdges]);
 
+  // Load graph and auto-layout
+  const onLoadGraph = useCallback((loadedNodes, loadedEdges) => {
+    const nodesWithTypes = loadedNodes.map(n => ({
+      ...n,
+      type: 'problemNode',
+      position: n.position || { x: 0, y: 0 }
+    }));
+    
+    const edgesWithStyling = loadedEdges.map(e => ({
+      ...e,
+      animated: e.animated !== undefined ? e.animated : true,
+      style: e.style || { stroke: '#000000' },
+      markerEnd: e.markerEnd || { type: MarkerType.ArrowClosed, color: '#000000' }
+    }));
+
+    const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+      nodesWithTypes,
+      edgesWithStyling
+    );
+    setNodes(layoutedNodes);
+    setEdges(layoutedEdges);
+  }, [setNodes, setEdges]);
+
   // Handle drag-and-drop linking
   const onNodeDragStart = useCallback((event, node) => {
     setActiveDragNodeId(node.id);
@@ -221,6 +244,7 @@ export default function App() {
         setEdges={setEdges}
         selectedNodes={selectedNodes}
         selectedEdges={selectedEdges}
+        onLoadGraph={onLoadGraph}
       />
 
       <div style={{ flexGrow: 1, position: 'relative', background: 'linear-gradient(to bottom, #ffb0b0, #b0b0ff)' }}>

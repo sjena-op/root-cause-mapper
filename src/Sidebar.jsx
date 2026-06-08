@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNodes, selectedEdges }) {
+export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNodes, selectedEdges, onLoadGraph }) {
   const [newNodeName, setNewNodeName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [newNodeDiff, setNewNodeDiff] = useState(5);
@@ -60,6 +60,60 @@ export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNode
   const handleDeleteEdge = () => {
     if (!selectedEdge) return;
     setEdges((eds) => eds.filter(e => e.id !== selectedEdge.id));
+  };
+
+  // --- SAVE / LOAD HANDLERS ---
+  const handleSaveGraph = () => {
+    const graphData = {
+      nodes: nodes.map(n => ({
+        id: n.id,
+        type: n.type,
+        position: n.position,
+        data: {
+          label: n.data.label,
+          difficulty: n.data.difficulty
+        }
+      })),
+      edges: edges.map(e => ({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        animated: e.animated,
+        style: e.style,
+        markerEnd: e.markerEnd
+      }))
+    };
+
+    const blob = new Blob([JSON.stringify(graphData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'problem-network-graph.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleLoadGraphClick = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = JSON.parse(event.target.result);
+        if (Array.isArray(data.nodes) && Array.isArray(data.edges)) {
+          onLoadGraph(data.nodes, data.edges);
+        } else {
+          alert("Invalid graph file format. Make sure it contains 'nodes' and 'edges' arrays.");
+        }
+      } catch (err) {
+        alert("Error parsing JSON file.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = null;
   };
 
   // --- ANALYSIS FUNCTIONS ---
@@ -343,6 +397,31 @@ export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNode
             <button style={{ ...buttonStyle, background: '#cc0000', width: '100%', padding: '6px' }} onClick={handleDeleteEdge}>Delete Edge</button>
           </div>
         )}
+      </div>
+
+      {/* SAVE / LOAD GRAPH SECTION */}
+      <div style={{ marginBottom: '20px', borderTop: '1px solid #ccc', paddingTop: '10px' }}>
+        <h3 style={{ marginTop: 0, fontSize: '1rem' }}>Save / Load Graph</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <button style={{ ...buttonStyle, background: '#10b981' }} onClick={handleSaveGraph}>
+            Save Graph File
+          </button>
+          <label style={{
+            ...buttonStyle,
+            background: '#6b7280',
+            textAlign: 'center',
+            display: 'block',
+            cursor: 'pointer'
+          }}>
+            Load Graph File
+            <input
+              type="file"
+              accept=".json"
+              onChange={handleLoadGraphClick}
+              style={{ display: 'none' }}
+            />
+          </label>
+        </div>
       </div>
 
       <h3 style={{ marginTop: 0, fontSize: '1rem', borderTop: '1px solid #ccc', paddingTop: '10px' }}>Analysis</h3>
