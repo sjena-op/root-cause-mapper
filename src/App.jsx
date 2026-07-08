@@ -97,12 +97,26 @@ export default function App() {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
+    let lastWidth = window.innerWidth;
+    
+    // Initial check
+    if (window.innerWidth < 768) {
+      setIsCollapsed(true);
+    }
+
     const handleResize = () => {
-      if (window.innerWidth < 768) {
+      const currentWidth = window.innerWidth;
+      
+      // Only change collapsed state if crossing the 768px mobile/desktop boundary
+      if (lastWidth >= 768 && currentWidth < 768) {
         setIsCollapsed(true);
+      } else if (lastWidth < 768 && currentWidth >= 768) {
+        setIsCollapsed(false);
       }
+      
+      lastWidth = currentWidth;
     };
-    handleResize();
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -328,6 +342,7 @@ export default function App() {
           onNodeDragStart={onNodeDragStart}
           onNodeDrag={onNodeDrag}
           onNodeDragStop={onNodeDragStop}
+          onPaneClick={() => setIsCollapsed(true)}
           nodeTypes={nodeTypes}
           deleteKeyCode={['Backspace', 'Delete']}
           fitView
