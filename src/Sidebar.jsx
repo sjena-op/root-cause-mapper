@@ -1,6 +1,22 @@
 import { useState, useEffect } from 'react';
+import { 
+  Search, 
+  PlusCircle, 
+  Trash2, 
+  Edit3, 
+  Save, 
+  FolderOpen, 
+  Info, 
+  RefreshCw, 
+  GitBranch, 
+  Sliders, 
+  X, 
+  ChevronLeft, 
+  ChevronRight, 
+  Network
+} from 'lucide-react';
 
-export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNodes, selectedEdges, onLoadGraph }) {
+export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNodes, selectedEdges, onLoadGraph, isCollapsed, setIsCollapsed }) {
   const [newNodeName, setNewNodeName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [newNodeDiff, setNewNodeDiff] = useState(3);
@@ -326,92 +342,128 @@ export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNode
     );
   };
 
+  const sidebarStyle = {
+    width: isCollapsed ? '72px' : '280px',
+    background: '#ffffff',
+    borderRight: '1px solid #e5e7eb',
+    padding: isCollapsed ? '15px 10px' : '20px',
+    display: 'flex',
+    flexDirection: 'column',
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    height: '100vh',
+    overflowY: 'auto',
+    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+    zIndex: 100,
+    position: 'relative'
+  };
+
   return (
-    <aside style={sidebarStyle}>
-      <h2 style={{ marginTop: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>Root Cause Map</h2>
-
-      <div style={{ marginBottom: '20px' }}>
-        <input
-          type="text"
-          placeholder="Search problems..."
-          value={searchQuery}
-          onChange={handleSearchChange}
-          className="form-control form-control-sm"
-        />
+    <aside style={sidebarStyle} className={`sidebar-container ${isCollapsed ? 'collapsed' : 'expanded'}`}>
+      {/* Header */}
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: isCollapsed ? 'center' : 'space-between', 
+        marginBottom: '20px' 
+      }}>
+        {!isCollapsed && (
+          <h2 style={{ margin: 0, fontSize: '1.3rem', fontWeight: '800', background: 'linear-gradient(135deg, #2563eb, #7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Network size={22} style={{ color: '#2563eb' }} />
+            CauseMap
+          </h2>
+        )}
+        <button 
+          onClick={() => setIsCollapsed(!isCollapsed)} 
+          className="btn btn-light btn-sm d-flex align-items-center justify-content-center toggle-sidebar-btn"
+          style={{ 
+            borderRadius: '50%', 
+            width: '32px', 
+            height: '32px', 
+            padding: 0,
+            border: '1px solid #e5e7eb',
+            boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+          }}
+          title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+        >
+          {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+        </button>
       </div>
 
-      <div style={{ marginBottom: '20px', borderTop: '1px solid #ccc', paddingTop: '10px' }}>
-        <h3 style={{ marginTop: 0, fontSize: '1rem', fontWeight: 'bold' }}>Manage Nodes</h3>
-
-        {/* CREATE NODE */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '15px' }}>
-          <input
-            type="text"
-            placeholder="New problem name..."
-            value={newNodeName}
-            onChange={(e) => setNewNodeName(e.target.value)}
-            className="form-control form-control-sm"
-          />
-          <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
-            <span style={{ fontSize: '12px' }}>Diff:</span>
-            <input
-              type="number"
-              min="1" max="5"
-              value={newNodeDiff}
-              onChange={(e) => setNewNodeDiff(parseInt(e.target.value) || 1)}
-              className="form-control form-control-sm"
-              style={{ width: '60px' }}
-            />
-            <button className="btn btn-primary btn-sm flex-grow-1" onClick={handleAddNode}>Add Node</button>
-          </div>
-        </div>
-
-        {/* EDIT/DELETE SELECTED ELEMENT */}
-        {selectedNode && (
-          <div style={{ background: '#e0e0e0', padding: '10px', borderRadius: '4px' }}>
-            <div style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '5px' }}>Edit Selected Node</div>
-            <input
-              type="text"
-              value={editNodeName}
-              onChange={(e) => setEditNodeName(e.target.value)}
-              className="form-control form-control-sm"
-              style={{ marginBottom: '5px' }}
-            />
-            <div style={{ display: 'flex', gap: '5px', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ fontSize: '12px' }}>Diff:</span>
-              <input
-                type="number"
-                min="1" max="5"
-                value={editNodeDiff}
-                onChange={(e) => setEditNodeDiff(parseInt(e.target.value) || 1)}
-                className="form-control form-control-sm"
-                style={{ width: '60px' }}
-              />
-            </div>
-            <div style={{ display: 'flex', gap: '5px' }}>
-              <button className="btn btn-success btn-sm flex-grow-1" onClick={handleUpdateNode}>Update</button>
-              <button className="btn btn-danger btn-sm flex-grow-1" onClick={handleDeleteNode}>Delete</button>
-            </div>
-          </div>
-        )}
-
-        {selectedEdge && !selectedNode && (
-          <div style={{ background: '#e0e0e0', padding: '10px', borderRadius: '4px', textAlign: 'center' }}>
-            <p style={{ margin: '0 0 10px 0', fontSize: '12px', fontWeight: 'bold' }}>Edge Selected</p>
-            <button className="btn btn-danger btn-sm w-100" onClick={handleDeleteEdge}>Delete Edge</button>
-          </div>
-        )}
-      </div>
-
-      {/* SAVE / LOAD GRAPH SECTION */}
-      <div style={{ marginBottom: '20px', borderTop: '1px solid #ccc', paddingTop: '10px' }}>
-        <h3 style={{ marginTop: 0, fontSize: '1rem', fontWeight: 'bold' }}>Save / Load Graph</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <button className="btn btn-success btn-sm w-100" onClick={handleSaveGraph}>
-            Save Graph File
+      {isCollapsed ? (
+        <div className="d-flex flex-column align-items-center gap-2 w-100">
+          {/* SEARCH */}
+          <button 
+            className="btn btn-outline-secondary btn-sm w-100 d-flex align-items-center justify-content-center"
+            onClick={() => setIsCollapsed(false)}
+            title="Search Problems"
+            style={{ height: '40px', borderRadius: '8px' }}
+          >
+            <Search size={18} />
           </button>
-          <label className="btn btn-secondary btn-sm w-100" style={{ cursor: 'pointer' }}>
-            Load Graph File
+
+          <hr style={{ width: '100%', margin: '8px 0', borderColor: '#e5e7eb' }} />
+
+          {/* ADD NODE */}
+          <button 
+            className="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center"
+            onClick={() => setIsCollapsed(false)}
+            title="Add Problem Node"
+            style={{ height: '40px', borderRadius: '8px' }}
+          >
+            <PlusCircle size={18} />
+          </button>
+
+          {/* SELECTED NODE EDIT/DELETE */}
+          {selectedNode && (
+            <>
+              <button 
+                className="btn btn-warning btn-sm w-100 d-flex align-items-center justify-content-center text-dark"
+                onClick={() => setIsCollapsed(false)}
+                title="Edit Selected Node"
+                style={{ height: '40px', borderRadius: '8px' }}
+              >
+                <Edit3 size={18} />
+              </button>
+              <button 
+                className="btn btn-danger btn-sm w-100 d-flex align-items-center justify-content-center"
+                onClick={handleDeleteNode}
+                title="Delete Selected Node"
+                style={{ height: '40px', borderRadius: '8px' }}
+              >
+                <Trash2 size={18} />
+              </button>
+            </>
+          )}
+
+          {/* SELECTED EDGE DELETE */}
+          {selectedEdge && !selectedNode && (
+            <button 
+              className="btn btn-danger btn-sm w-100 d-flex align-items-center justify-content-center"
+              onClick={handleDeleteEdge}
+              title="Delete Selected Edge"
+              style={{ height: '40px', borderRadius: '8px' }}
+            >
+              <Trash2 size={18} />
+            </button>
+          )}
+
+          <hr style={{ width: '100%', margin: '8px 0', borderColor: '#e5e7eb' }} />
+
+          {/* SAVE/LOAD */}
+          <button 
+            className="btn btn-success btn-sm w-100 d-flex align-items-center justify-content-center"
+            onClick={handleSaveGraph}
+            title="Save Graph File"
+            style={{ height: '40px', borderRadius: '8px' }}
+          >
+            <Save size={18} />
+          </button>
+          <label 
+            className="btn btn-secondary btn-sm w-100 d-flex align-items-center justify-content-center" 
+            style={{ cursor: 'pointer', height: '40px', margin: 0, borderRadius: '8px' }}
+            title="Load Graph File"
+          >
+            <FolderOpen size={18} />
             <input
               type="file"
               accept=".json"
@@ -419,22 +471,193 @@ export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNode
               style={{ display: 'none' }}
             />
           </label>
+
+          <hr style={{ width: '100%', margin: '8px 0', borderColor: '#e5e7eb' }} />
+
+          {/* ANALYSIS */}
+          <button 
+            className="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center"
+            onClick={handleFindRoots}
+            title="Find Root Causes"
+            style={{ height: '40px', borderRadius: '8px' }}
+          >
+            <Info size={18} />
+          </button>
+          <button 
+            className="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center"
+            onClick={handleDetectCycles}
+            title="Detect Cycles"
+            style={{ height: '40px', borderRadius: '8px' }}
+          >
+            <RefreshCw size={18} />
+          </button>
+          <button 
+            className="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center"
+            onClick={handleLongestChain}
+            title="Find Longest Chain"
+            style={{ height: '40px', borderRadius: '8px' }}
+          >
+            <GitBranch size={18} />
+          </button>
+          <button 
+            className="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center"
+            onClick={handleRankDifficulty}
+            title="Rank by Difficulty"
+            style={{ height: '40px', borderRadius: '8px' }}
+          >
+            <Sliders size={18} />
+          </button>
+          <button 
+            className="btn btn-outline-danger btn-sm w-100 d-flex align-items-center justify-content-center"
+            onClick={() => setNodes(resetHighlight())}
+            title="Clear Analysis Highlights"
+            style={{ height: '40px', borderRadius: '8px' }}
+          >
+            <X size={18} />
+          </button>
         </div>
-      </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+          {/* SEARCH */}
+          <div style={{ marginBottom: '20px' }}>
+            <div className="input-group input-group-sm">
+              <span className="input-group-text bg-white border-end-0">
+                <Search size={16} className="text-muted" />
+              </span>
+              <input
+                type="text"
+                placeholder="Search problems..."
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="form-control form-control-sm border-start-0 ps-0"
+                style={{ boxShadow: 'none' }}
+              />
+            </div>
+          </div>
 
-      <h3 style={{ marginTop: 0, fontSize: '1rem', borderTop: '1px solid #ccc', paddingTop: '10px', fontWeight: 'bold' }}>Analysis</h3>
+          {/* MANAGE NODES */}
+          <div style={{ marginBottom: '20px', borderTop: '1px solid #f3f4f6', paddingTop: '15px' }}>
+            <h3 style={{ marginTop: 0, fontSize: '0.8rem', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
+              Manage Nodes
+            </h3>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <button className="btn btn-primary btn-sm w-100" onClick={handleFindRoots}>
-          Find Root Causes
-        </button>
-        <button className="btn btn-primary btn-sm w-100" onClick={handleDetectCycles}>Detect Cycles</button>
-        <button className="btn btn-primary btn-sm w-100" onClick={handleLongestChain}>Longest Chain</button>
-        <button className="btn btn-primary btn-sm w-100" onClick={handleRankDifficulty}>Rank by Difficulty</button>
-        <button className="btn btn-secondary btn-sm w-100" onClick={() => setNodes(resetHighlight())}>Clear Analysis</button>
-      </div>
+            {/* CREATE NODE */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '15px' }}>
+              <input
+                type="text"
+                placeholder="New problem name..."
+                value={newNodeName}
+                onChange={(e) => setNewNodeName(e.target.value)}
+                className="form-control form-control-sm"
+                style={{ borderRadius: '6px' }}
+              />
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', color: '#4b5563', fontWeight: '500' }}>Diff:</span>
+                <input
+                  type="number"
+                  min="1" max="5"
+                  value={newNodeDiff}
+                  onChange={(e) => setNewNodeDiff(parseInt(e.target.value) || 1)}
+                  className="form-control form-control-sm"
+                  style={{ width: '55px', borderRadius: '6px' }}
+                />
+                <button className="btn btn-primary btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1" onClick={handleAddNode} style={{ borderRadius: '6px' }}>
+                  <PlusCircle size={14} /> Add Node
+                </button>
+              </div>
+            </div>
+
+            {/* EDIT/DELETE SELECTED ELEMENT */}
+            {selectedNode && (
+              <div style={{ background: '#f9fafb', padding: '12px', borderRadius: '8px', border: '1px solid #f3f4f6' }}>
+                <div style={{ fontSize: '12px', fontWeight: '600', color: '#374151', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <Edit3 size={14} className="text-warning" /> Edit Selected Node
+                </div>
+                <input
+                  type="text"
+                  value={editNodeName}
+                  onChange={(e) => setEditNodeName(e.target.value)}
+                  className="form-control form-control-sm"
+                  style={{ marginBottom: '8px', borderRadius: '6px' }}
+                />
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '12px' }}>
+                  <span style={{ fontSize: '12px', color: '#4b5563', fontWeight: '500' }}>Diff:</span>
+                  <input
+                    type="number"
+                    min="1" max="5"
+                    value={editNodeDiff}
+                    onChange={(e) => setEditNodeDiff(parseInt(e.target.value) || 1)}
+                    className="form-control form-control-sm"
+                    style={{ width: '55px', borderRadius: '6px' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button className="btn btn-success btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1" onClick={handleUpdateNode} style={{ borderRadius: '6px' }}>
+                    Update
+                  </button>
+                  <button className="btn btn-danger btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1" onClick={handleDeleteNode} style={{ borderRadius: '6px' }}>
+                    <Trash2 size={14} /> Delete
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {selectedEdge && !selectedNode && (
+              <div style={{ background: '#f9fafb', padding: '12px', borderRadius: '8px', border: '1px solid #f3f4f6', textAlign: 'center' }}>
+                <p style={{ margin: '0 0 8px 0', fontSize: '12px', fontWeight: '600', color: '#374151' }}>Edge Selected</p>
+                <button className="btn btn-danger btn-sm w-100 d-flex align-items-center justify-content-center gap-1" onClick={handleDeleteEdge} style={{ borderRadius: '6px' }}>
+                  <Trash2 size={14} /> Delete Edge
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* SAVE / LOAD GRAPH SECTION */}
+          <div style={{ marginBottom: '20px', borderTop: '1px solid #f3f4f6', paddingTop: '15px' }}>
+            <h3 style={{ marginTop: 0, fontSize: '0.8rem', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
+              Save / Load Graph
+            </h3>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button className="btn btn-success btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1" onClick={handleSaveGraph} style={{ borderRadius: '6px' }}>
+                <Save size={14} /> Save
+              </button>
+              <label className="btn btn-secondary btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1" style={{ cursor: 'pointer', margin: 0, borderRadius: '6px' }}>
+                <FolderOpen size={14} /> Load
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={handleLoadGraphClick}
+                  style={{ display: 'none' }}
+                />
+              </label>
+            </div>
+          </div>
+
+          {/* ANALYSIS */}
+          <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: '15px', flexGrow: 1 }}>
+            <h3 style={{ marginTop: 0, fontSize: '0.8rem', fontWeight: '700', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>
+              Analysis Tools
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <button className="btn btn-outline-primary btn-sm w-100 text-start d-flex align-items-center gap-2" onClick={handleFindRoots} style={{ borderRadius: '6px', padding: '6px 12px' }}>
+                <Info size={14} /> Find Root Causes
+              </button>
+              <button className="btn btn-outline-primary btn-sm w-100 text-start d-flex align-items-center gap-2" onClick={handleDetectCycles} style={{ borderRadius: '6px', padding: '6px 12px' }}>
+                <RefreshCw size={14} /> Detect Cycles
+              </button>
+              <button className="btn btn-outline-primary btn-sm w-100 text-start d-flex align-items-center gap-2" onClick={handleLongestChain} style={{ borderRadius: '6px', padding: '6px 12px' }}>
+                <GitBranch size={14} /> Longest Chain
+              </button>
+              <button className="btn btn-outline-primary btn-sm w-100 text-start d-flex align-items-center gap-2" onClick={handleRankDifficulty} style={{ borderRadius: '6px', padding: '6px 12px' }}>
+                <Sliders size={14} /> Rank by Difficulty
+              </button>
+              <button className="btn btn-outline-danger btn-sm w-100 text-start d-flex align-items-center gap-2 mt-2" onClick={() => setNodes(resetHighlight())} style={{ borderRadius: '6px', padding: '6px 12px' }}>
+                <X size={14} /> Clear Analysis
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </aside>
   );
 }
-
-const sidebarStyle = { width: '250px', background: '#f4f4f4', borderRight: '1px solid #ddd', padding: '20px', display: 'flex', flexDirection: 'column' };

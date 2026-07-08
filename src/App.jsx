@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import ReactFlow, {
   Background,
   Controls,
@@ -14,6 +14,7 @@ import 'reactflow/dist/style.css';
 
 import ProblemNode from './ProblemNode';
 import Sidebar from './Sidebar';
+import { Shuffle } from 'lucide-react';
 
 const nodeTypes = { problemNode: ProblemNode };
 
@@ -92,6 +93,19 @@ export default function App() {
   const [activeDragNodeId, setActiveDragNodeId] = useState(null);
   const [hoveredNodeId, setHoveredNodeId] = useState(null);
   const [hoverRelation, setHoverRelation] = useState(null); // 'cause' or 'effect'
+
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsCollapsed(true);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge({ ...params, animated: true, markerEnd: { type: MarkerType.ArrowClosed, color: '#000000' }, style: { stroke: '#000000' } }, eds)),
@@ -254,7 +268,7 @@ export default function App() {
     : edges;
 
   return (
-    <div style={{ display: 'flex', width: '100vw', height: '100vh' }}>
+    <div className="app-container">
       <Sidebar
         nodes={nodes}
         edges={edges}
@@ -263,9 +277,11 @@ export default function App() {
         selectedNodes={selectedNodes}
         selectedEdges={selectedEdges}
         onLoadGraph={onLoadGraph}
+        isCollapsed={isCollapsed}
+        setIsCollapsed={setIsCollapsed}
       />
 
-      <div style={{ flexGrow: 1, position: 'relative', background: 'linear-gradient(to bottom, #ffb0b0, #b0b0ff)' }}>
+      <div className="main-content" style={{ flexGrow: 1, position: 'relative', background: 'linear-gradient(to bottom, #ffb0b0, #b0b0ff)', height: '100%' }}>
         {/* Fixed CAUSES / EFFECTS Background Labels */}
         <div style={{
           position: 'absolute',
@@ -319,13 +335,15 @@ export default function App() {
           <Panel position="top-right">
             <button
               onClick={onLayout}
-              style={{ padding: '8px 12px', background: '#333', color: 'white', borderRadius: '4px', cursor: 'pointer', border: 'none' }}
+              className="btn btn-dark btn-sm d-flex align-items-center gap-2"
+              style={{ borderRadius: '6px', padding: '6px 12px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
             >
-              Organize Nodes
+              <Shuffle size={14} />
+              <span className="d-none d-sm-inline">Organize Nodes</span>
             </button>
           </Panel>
           <Background color="#ccc" gap={16} />
-          <Controls />
+          <Controls style={{ left: isCollapsed ? 80 : 290, transition: 'left 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }} />
           <MiniMap zoomable pannable />
         </ReactFlow>
       </div>
