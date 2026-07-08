@@ -21,7 +21,7 @@ const nodeTypes = { problemNode: ProblemNode };
 const initialNodes = [
   { id: 'edu', type: 'problemNode', position: { x: 0, y: 0 }, data: { label: 'Lack of traffic rules education', difficulty: 4 } },
   { id: 'corrupt', type: 'problemNode', position: { x: 0, y: 0 }, data: { label: 'Corruption', difficulty: 9 } },
-  { id: 'enforce', type: 'problemNode', position: { x: 0, y: 0 }, data: { label: 'Lack of traffic rule enforcement', difficulty: 7 } },
+  { id: 'enforce', type: 'problemNode', position: { x: 0, y: 0 }, data: { label: 'Traffic rules not enforced', difficulty: 7 } },
   { id: 'rules', type: 'problemNode', position: { x: 0, y: 0 }, data: { label: 'No Traffic Rules followed', difficulty: 5 } },
   { id: 'traffic', type: 'problemNode', position: { x: 0, y: 0 }, data: { label: 'Bad traffic', difficulty: 8 } },
 ];

@@ -1,0 +1,144 @@
+{
+  "nodes": [
+    {
+      "id": "edu",
+      "type": "problemNode",
+      "position": {
+        "x": 0,
+        "y": 110
+      },
+      "data": {
+        "label": "Lack of traffic rules education",
+        "difficulty": 4
+      }
+    },
+    {
+      "id": "corrupt",
+      "type": "problemNode",
+      "position": {
+        "x": 194,
+        "y": -44
+      },
+      "data": {
+        "label": "Corruption",
+        "difficulty": 9
+      }
+    },
+    {
+      "id": "enforce",
+      "type": "problemNode",
+      "position": {
+        "x": 250,
+        "y": 110
+      },
+      "data": {
+        "label": "Lack of traffic rule enforcement",
+        "difficulty": 7
+      }
+    },
+    {
+      "id": "rules",
+      "type": "problemNode",
+      "position": {
+        "x": 125,
+        "y": 220
+      },
+      "data": {
+        "label": "No Traffic Rules followed",
+        "difficulty": 5
+      }
+    },
+    {
+      "id": "traffic",
+      "type": "problemNode",
+      "position": {
+        "x": 125,
+        "y": 330
+      },
+      "data": {
+        "label": "Bad traffic",
+        "difficulty": 8
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e-edu-rules",
+      "source": "edu",
+      "target": "rules",
+      "animated": true,
+      "style": {
+        "stroke": "#000000"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "color": "#000000"
+      }
+    },
+    {
+      "id": "e-corrupt-enforce",
+      "source": "corrupt",
+      "target": "enforce",
+      "animated": true,
+      "style": {
+        "stroke": "#000000"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "color": "#000000"
+      }
+    },
+    {
+      "id": "e-enforce-rules",
+      "source": "enforce",
+      "target": "rules",
+      "animated": true,
+      "style": {
+        "stroke": "#000000"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "color": "#000000"
+      }
+    },
+    {
+      "id": "e-rules-traffic",
+      "source": "rules",
+      "target": "traffic",
+      "animated": true,
+      "style": {
+        "stroke": "#000000"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "color": "#000000"
+      }
+    },
+    {
+      "id": "edge-1780953972437",
+      "source": "corrupt",
+      "target": "rules",
+      "animated": true,
+      "style": {
+        "stroke": "#000000"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "color": "#000000"
+      }
+    },
+    {
+      "id": "edge-1780953979637",
+      "source": "corrupt",
+      "target": "edu",
+      "animated": true,
+      "style": {
+        "stroke": "#000000"
+      },
+      "markerEnd": {
+        "type": "arrowclosed",
+        "color": "#000000"
+      }
+    }
+  ]
+}

@@ -2,6 +2,8 @@
 
 An interactive graph-based visualization tool built as a personal project to map, visualize, and analyze complex, interconnected problems affecting society. It leverages graph concepts and modern web UI tools to let users define societal issues and construct a visual cause-and-effect network.
 
+![Problem Network Screenshot](./public/screenshot.png)
+
 ---
 
 ## 🌟 The Vision
@@ -17,10 +19,10 @@ The application is built with simplicity, clean visualization, and scalability i
 * **Societal Issue Definition:** Define and customize problem nodes with labels, details, and difficulty ratings.
 * **Canvas Visualization:** Interactive workspace where problem nodes can be positioned, edited, and dynamically added.
 * **Quick Search:** Easily search and filter existing problems using a keyword search bar.
-* **Smart Drag-and-Drop Relations (Planned/In Progress):** Establish relationships between problems by dropping one over another (dropping "over" to link as a cause, or "under" to link as an effect) with real-time hover previews.
+* **Smart Drag-and-Drop Relations:** Establish relationships between problems by dropping one over another (dropping "over" to link as a cause, or "under" to link as an effect) with real-time hover previews.
 * **Auto-Layout Engine:** Auto-adjust and conformation of the connector lines to present a clean, organized, directed acyclic/directed graph (DAG) layout using Dagre.
 
-### 2. Graph & Network Analysis (Planned/In Progress)
+### 2. Graph & Network Analysis
 Dedicated analytical tools to query the structure of the problem network:
 * **Root Cause Finder:** Identify the "root(s)" of all problems (nodes with no incoming causes).
 * **Cycle Detector:** Detect cyclic dependency behavior in the graph (identifying loops where problems sustain each other).
