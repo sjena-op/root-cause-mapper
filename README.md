@@ -2,6 +2,8 @@
 
 An interactive graph-based visualization tool built as a personal project to map, visualize, and analyze complex, interconnected problems affecting society. It leverages graph concepts and modern web UI tools to let users define societal issues and construct a visual cause-and-effect network.
 
+**Live Demo:** [https://root-cause-mapper.vercel.app/](https://root-cause-mapper.vercel.app/)
+
 ![Problem Network Screenshot](./public/screenshot.png)
 
 ---
