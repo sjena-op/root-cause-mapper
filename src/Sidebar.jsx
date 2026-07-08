@@ -3,10 +3,10 @@ import { useState, useEffect } from 'react';
 export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNodes, selectedEdges, onLoadGraph }) {
   const [newNodeName, setNewNodeName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [newNodeDiff, setNewNodeDiff] = useState(5);
+  const [newNodeDiff, setNewNodeDiff] = useState(3);
 
   const [editNodeName, setEditNodeName] = useState('');
-  const [editNodeDiff, setEditNodeDiff] = useState(5);
+  const [editNodeDiff, setEditNodeDiff] = useState(3);
 
   const selectedNode = selectedNodes?.[0];
   const selectedEdge = selectedEdges?.[0];
@@ -14,9 +14,9 @@ export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNode
   useEffect(() => {
     if (selectedNode) {
       setEditNodeName(selectedNode.data.label || '');
-      setEditNodeDiff(selectedNode.data.difficulty || 5);
+      setEditNodeDiff(selectedNode.data.difficulty || 3);
     }
-  }, [selectedNode]);
+  }, [selectedNode, selectedNode?.data?.label, selectedNode?.data?.difficulty]);
 
   // --- CRUD FUNCTIONS ---
   const handleAddNode = () => {
@@ -29,7 +29,7 @@ export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNode
     };
     setNodes((nds) => [...nds, newNode]);
     setNewNodeName('');
-    setNewNodeDiff(5);
+    setNewNodeDiff(3);
   };
 
   const handleUpdateNode = () => {
@@ -69,6 +69,7 @@ export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNode
         id: n.id,
         type: n.type,
         position: n.position,
+        style: n.style,
         data: {
           label: n.data.label,
           difficulty: n.data.difficulty
@@ -259,13 +260,13 @@ export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNode
     let maxDiff = -Infinity;
 
     nodes.forEach(node => {
-      const diff = node.data.difficulty || 5;
+      const diff = node.data.difficulty || 3;
       if (diff < minDiff) minDiff = diff;
       if (diff > maxDiff) maxDiff = diff;
     });
 
     const highlightedNodes = resetHighlight().map(node => {
-      const diff = node.data.difficulty || 5;
+      const diff = node.data.difficulty || 3;
       if (diff === maxDiff) {
         return {
           ...node,
@@ -327,7 +328,7 @@ export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNode
 
   return (
     <aside style={sidebarStyle}>
-      <h2 style={{ marginTop: 0 }}>Problem Network</h2>
+      <h2 style={{ marginTop: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>Root Cause Map</h2>
 
       <div style={{ marginBottom: '20px' }}>
         <input
@@ -335,12 +336,12 @@ export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNode
           placeholder="Search problems..."
           value={searchQuery}
           onChange={handleSearchChange}
-          style={inputStyle}
+          className="form-control form-control-sm"
         />
       </div>
 
       <div style={{ marginBottom: '20px', borderTop: '1px solid #ccc', paddingTop: '10px' }}>
-        <h3 style={{ marginTop: 0, fontSize: '1rem' }}>Manage Nodes</h3>
+        <h3 style={{ marginTop: 0, fontSize: '1rem', fontWeight: 'bold' }}>Manage Nodes</h3>
 
         {/* CREATE NODE */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '15px' }}>
@@ -349,18 +350,19 @@ export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNode
             placeholder="New problem name..."
             value={newNodeName}
             onChange={(e) => setNewNodeName(e.target.value)}
-            style={inputStyle}
+            className="form-control form-control-sm"
           />
           <div style={{ display: 'flex', gap: '5px', alignItems: 'center' }}>
             <span style={{ fontSize: '12px' }}>Diff:</span>
             <input
               type="number"
-              min="1" max="10"
+              min="1" max="5"
               value={newNodeDiff}
               onChange={(e) => setNewNodeDiff(parseInt(e.target.value) || 1)}
-              style={{ ...inputStyle, width: '60px' }}
+              className="form-control form-control-sm"
+              style={{ width: '60px' }}
             />
-            <button style={{ ...buttonStyle, flex: 1, padding: '8px' }} onClick={handleAddNode}>Add Node</button>
+            <button className="btn btn-primary btn-sm flex-grow-1" onClick={handleAddNode}>Add Node</button>
           </div>
         </div>
 
@@ -372,21 +374,23 @@ export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNode
               type="text"
               value={editNodeName}
               onChange={(e) => setEditNodeName(e.target.value)}
-              style={{ ...inputStyle, marginBottom: '5px' }}
+              className="form-control form-control-sm"
+              style={{ marginBottom: '5px' }}
             />
             <div style={{ display: 'flex', gap: '5px', alignItems: 'center', marginBottom: '10px' }}>
               <span style={{ fontSize: '12px' }}>Diff:</span>
               <input
                 type="number"
-                min="1" max="10"
+                min="1" max="5"
                 value={editNodeDiff}
                 onChange={(e) => setEditNodeDiff(parseInt(e.target.value) || 1)}
-                style={{ ...inputStyle, width: '60px' }}
+                className="form-control form-control-sm"
+                style={{ width: '60px' }}
               />
             </div>
             <div style={{ display: 'flex', gap: '5px' }}>
-              <button style={{ ...buttonStyle, background: '#228B22', flex: 1, padding: '6px' }} onClick={handleUpdateNode}>Update</button>
-              <button style={{ ...buttonStyle, background: '#cc0000', flex: 1, padding: '6px' }} onClick={handleDeleteNode}>Delete</button>
+              <button className="btn btn-success btn-sm flex-grow-1" onClick={handleUpdateNode}>Update</button>
+              <button className="btn btn-danger btn-sm flex-grow-1" onClick={handleDeleteNode}>Delete</button>
             </div>
           </div>
         )}
@@ -394,25 +398,19 @@ export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNode
         {selectedEdge && !selectedNode && (
           <div style={{ background: '#e0e0e0', padding: '10px', borderRadius: '4px', textAlign: 'center' }}>
             <p style={{ margin: '0 0 10px 0', fontSize: '12px', fontWeight: 'bold' }}>Edge Selected</p>
-            <button style={{ ...buttonStyle, background: '#cc0000', width: '100%', padding: '6px' }} onClick={handleDeleteEdge}>Delete Edge</button>
+            <button className="btn btn-danger btn-sm w-100" onClick={handleDeleteEdge}>Delete Edge</button>
           </div>
         )}
       </div>
 
       {/* SAVE / LOAD GRAPH SECTION */}
       <div style={{ marginBottom: '20px', borderTop: '1px solid #ccc', paddingTop: '10px' }}>
-        <h3 style={{ marginTop: 0, fontSize: '1rem' }}>Save / Load Graph</h3>
+        <h3 style={{ marginTop: 0, fontSize: '1rem', fontWeight: 'bold' }}>Save / Load Graph</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <button style={{ ...buttonStyle, background: '#10b981' }} onClick={handleSaveGraph}>
+          <button className="btn btn-success btn-sm w-100" onClick={handleSaveGraph}>
             Save Graph File
           </button>
-          <label style={{
-            ...buttonStyle,
-            background: '#6b7280',
-            textAlign: 'center',
-            display: 'block',
-            cursor: 'pointer'
-          }}>
+          <label className="btn btn-secondary btn-sm w-100" style={{ cursor: 'pointer' }}>
             Load Graph File
             <input
               type="file"
@@ -424,22 +422,19 @@ export default function Sidebar({ nodes, edges, setNodes, setEdges, selectedNode
         </div>
       </div>
 
-      <h3 style={{ marginTop: 0, fontSize: '1rem', borderTop: '1px solid #ccc', paddingTop: '10px' }}>Analysis</h3>
+      <h3 style={{ marginTop: 0, fontSize: '1rem', borderTop: '1px solid #ccc', paddingTop: '10px', fontWeight: 'bold' }}>Analysis</h3>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        <button style={buttonStyle} onClick={handleFindRoots}>
+        <button className="btn btn-primary btn-sm w-100" onClick={handleFindRoots}>
           Find Root Causes
         </button>
-        <button style={buttonStyle} onClick={handleDetectCycles}>Detect Cycles</button>
-        <button style={buttonStyle} onClick={handleLongestChain}>Longest Chain</button>
-        <button style={buttonStyle} onClick={handleRankDifficulty}>Rank by Difficulty</button>
-        <button style={{ ...buttonStyle, background: '#888' }} onClick={() => setNodes(resetHighlight())}>Clear Analysis</button>
+        <button className="btn btn-primary btn-sm w-100" onClick={handleDetectCycles}>Detect Cycles</button>
+        <button className="btn btn-primary btn-sm w-100" onClick={handleLongestChain}>Longest Chain</button>
+        <button className="btn btn-primary btn-sm w-100" onClick={handleRankDifficulty}>Rank by Difficulty</button>
+        <button className="btn btn-secondary btn-sm w-100" onClick={() => setNodes(resetHighlight())}>Clear Analysis</button>
       </div>
     </aside>
   );
 }
 
-// Styles remain the same
 const sidebarStyle = { width: '250px', background: '#f4f4f4', borderRight: '1px solid #ddd', padding: '20px', display: 'flex', flexDirection: 'column' };
-const inputStyle = { width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc', boxSizing: 'border-box' };
-const buttonStyle = { padding: '10px', background: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' };

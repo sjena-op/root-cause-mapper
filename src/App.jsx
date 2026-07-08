@@ -19,11 +19,11 @@ const nodeTypes = { problemNode: ProblemNode };
 
 // Initial Problems (Positions don't matter anymore, Dagre will handle them!)
 const initialNodes = [
-  { id: 'edu', type: 'problemNode', position: { x: 0, y: 0 }, data: { label: 'Lack of traffic rules education', difficulty: 4 } },
-  { id: 'corrupt', type: 'problemNode', position: { x: 0, y: 0 }, data: { label: 'Corruption', difficulty: 9 } },
-  { id: 'enforce', type: 'problemNode', position: { x: 0, y: 0 }, data: { label: 'Traffic rules not enforced', difficulty: 7 } },
-  { id: 'rules', type: 'problemNode', position: { x: 0, y: 0 }, data: { label: 'No Traffic Rules followed', difficulty: 5 } },
-  { id: 'traffic', type: 'problemNode', position: { x: 0, y: 0 }, data: { label: 'Bad traffic', difficulty: 8 } },
+  { id: 'edu', type: 'problemNode', position: { x: 0, y: 0 }, data: { label: 'Lack of traffic rules education', difficulty: 2 } },
+  { id: 'corrupt', type: 'problemNode', position: { x: 0, y: 0 }, data: { label: 'Corruption', difficulty: 5 } },
+  { id: 'enforce', type: 'problemNode', position: { x: 0, y: 0 }, data: { label: 'Traffic rules not enforced', difficulty: 4 } },
+  { id: 'rules', type: 'problemNode', position: { x: 0, y: 0 }, data: { label: 'No Traffic Rules followed', difficulty: 3 } },
+  { id: 'traffic', type: 'problemNode', position: { x: 0, y: 0 }, data: { label: 'Bad traffic', difficulty: 4 } },
 ];
 
 const initialEdges = [
@@ -39,7 +39,7 @@ dagreGraph.setDefaultEdgeLabel(() => ({}));
 
 // Approximate width and height of your custom ProblemNode
 const nodeWidth = 200;
-const nodeHeight = 60;
+const nodeHeight = 80;
 
 const getLayoutedElements = (nodes, edges, direction = 'TB') => {
   dagreGraph.setGraph({ rankdir: direction });
@@ -205,19 +205,37 @@ export default function App() {
     setHoverRelation(null);
   }, [hoveredNodeId, hoverRelation, edges, setEdges]);
 
-  // Inject hover state to nodes for custom visual cues
-  const displayNodes = nodes.map(node => {
-    if (node.id === hoveredNodeId) {
-      return {
-        ...node,
-        data: {
-          ...node.data,
-          isHoveredTarget: true,
-          hoverRelation: hoverRelation
+  const updateNodeData = useCallback((nodeId, newData) => {
+    setNodes((nds) =>
+      nds.map((n) => {
+        if (n.id === nodeId) {
+          return {
+            ...n,
+            data: {
+              ...n.data,
+              ...newData,
+            },
+          };
         }
-      };
+        return n;
+      })
+    );
+  }, [setNodes]);
+
+  // Inject hover state and updateNodeData callback to nodes for custom visual cues
+  const displayNodes = nodes.map(node => {
+    const baseNode = {
+      ...node,
+      data: {
+        ...node.data,
+        updateNodeData,
+      }
+    };
+    if (node.id === hoveredNodeId) {
+      baseNode.data.isHoveredTarget = true;
+      baseNode.data.hoverRelation = hoverRelation;
     }
-    return node;
+    return baseNode;
   });
 
   // Inject preview edge while dragging over a target node

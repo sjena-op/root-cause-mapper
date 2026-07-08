@@ -1,8 +1,45 @@
-import { Handle, Position } from 'reactflow';
+import { useState, useEffect } from 'react';
+import { Handle, Position, NodeResizer } from 'reactflow';
 
-export default function ProblemNode({ data, selected }) {
+export default function ProblemNode({ id, data, selected }) {
   const isHovered = data.isHoveredTarget;
   const hoverRel = data.hoverRelation;
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editLabel, setEditLabel] = useState(data.label || '');
+
+  // Keep local state in sync with prop changes
+  useEffect(() => {
+    setEditLabel(data.label || '');
+  }, [data.label]);
+
+  const handleDoubleClick = (e) => {
+    e.stopPropagation();
+    setIsEditing(true);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      saveLabel();
+    } else if (e.key === 'Escape') {
+      setIsEditing(false);
+      setEditLabel(data.label || '');
+    }
+  };
+
+  const saveLabel = () => {
+    if (editLabel.trim() && data.updateNodeData) {
+      data.updateNodeData(id, { label: editLabel.trim() });
+    }
+    setIsEditing(false);
+  };
+
+  const handleRatingClick = (e, val) => {
+    e.stopPropagation();
+    if (data.updateNodeData) {
+      data.updateNodeData(id, { difficulty: val });
+    }
+  };
 
   // Use highlights if present, otherwise use defaults
   let currentBg = data.highlightBg || (selected ? '#e0f2fe' : '#ffffff');
@@ -19,6 +56,20 @@ export default function ProblemNode({ data, selected }) {
     scale = 'scale(1.05)';
   }
 
+  const difficulty = data.difficulty || 3;
+  const filledCount = difficulty;
+
+  // Get color for rating boxes
+  const getRatingColor = (count) => {
+    if (count <= 1) return '#198754'; // Green
+    if (count === 2) return '#198754';
+    if (count === 3) return '#ffc107'; // Yellow
+    if (count === 4) return '#fd7e14'; // Orange
+    return '#dc3545'; // Red
+  };
+
+  const activeColor = getRatingColor(filledCount);
+
   return (
     <div
       className="problem-node"
@@ -31,6 +82,8 @@ export default function ProblemNode({ data, selected }) {
         transform: scale
       }}
     >
+      <NodeResizer minWidth={150} minHeight={80} isVisible={selected} />
+
       {/* Visual hover badge */}
       {isHovered && hoverRel && (
         <div style={{
@@ -56,11 +109,65 @@ export default function ProblemNode({ data, selected }) {
       {/* Target handle: where "causes" connect to this problem */}
       <Handle type="target" position={Position.Top} className="handle" />
 
-      <div style={{ fontWeight: 'bold', fontSize: '14px', textAlign: 'center' }}>
-        {data.label}
-      </div>
-      <div style={{ fontSize: '11px', textAlign: 'center', color: '#666', marginTop: '4px' }}>
-        Difficulty: {data.difficulty || 5}/10
+      {isEditing ? (
+        <input
+          type="text"
+          value={editLabel}
+          onChange={(e) => setEditLabel(e.target.value)}
+          onBlur={saveLabel}
+          onKeyDown={handleKeyDown}
+          className="form-control form-control-sm nodrag"
+          autoFocus
+          style={{
+            textAlign: 'center',
+            fontWeight: 'bold',
+            fontSize: '14px',
+            width: '90%'
+          }}
+        />
+      ) : (
+        <div
+          onDoubleClick={handleDoubleClick}
+          style={{
+            fontWeight: 'bold',
+            fontSize: '14px',
+            textAlign: 'center',
+            cursor: 'text',
+            userSelect: 'none',
+            width: '100%',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'normal',
+            wordBreak: 'break-word'
+          }}
+          title="Double click to edit label"
+        >
+          {data.label}
+        </div>
+      )}
+
+      {/* 5-box rating container */}
+      <div style={{ marginTop: '8px', display: 'flex', gap: '3px', alignItems: 'center' }}>
+        {[1, 2, 3, 4, 5].map((val) => {
+          const isFilled = val <= filledCount;
+          return (
+            <div
+              key={val}
+              onClick={(e) => handleRatingClick(e, val)}
+              className="nodrag"
+              style={{
+                width: '14px',
+                height: '14px',
+                borderRadius: '3px',
+                border: '1px solid #aaa',
+                cursor: 'pointer',
+                background: isFilled ? activeColor : '#e9ecef',
+                transition: 'background-color 0.15s ease'
+              }}
+              title={`Set difficulty to ${val}/5`}
+            />
+          );
+        })}
       </div>
 
       {/* Source handle: where this problem connects to its "effects" */}
@@ -70,10 +177,18 @@ export default function ProblemNode({ data, selected }) {
 }
 
 const baseNodeStyle = {
-  padding: '15px 20px',
+  padding: '12px 15px',
   borderRadius: '8px',
   borderStyle: 'solid',
+  width: '100%',
+  height: '100%',
+  boxSizing: 'border-box',
   minWidth: '150px',
-  transition: 'all 0.2s ease',
-  position: 'relative'
+  minHeight: '80px',
+  transition: 'transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease',
+  position: 'relative',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center'
 };
